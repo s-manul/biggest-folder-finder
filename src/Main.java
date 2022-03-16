@@ -2,31 +2,25 @@ import java.io.File;
 import java.util.concurrent.ForkJoinPool;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
-        String folderPath = "D:\\мое";
+    public static void main(String[] args) {
+
+        ParametersBag bag = new ParametersBag(args);
+
+        String folderPath = bag.getPath();
+        long sizeLimit = bag.getLimit();
+
         File file = new File(folderPath);
+        Node root = new Node(file, sizeLimit);
 
         long start = System.currentTimeMillis();
 
-        FolderSizeCalculator folderSizeCalculator = new FolderSizeCalculator(file);
+        FolderSizeCalculator folderSizeCalculator = new FolderSizeCalculator(root);
         ForkJoinPool pool = new ForkJoinPool();
-        long size = pool.invoke(folderSizeCalculator);
-        System.out.println(size);
+        pool.invoke(folderSizeCalculator);
+
+        System.out.println(root);
 
         long duration = System.currentTimeMillis() - start;
         System.out.println(duration + " ms");
-    }
-
-    public static long getFolderSize(File folder) {
-        if (folder.isFile()) {
-            return folder.length();
-        }
-        long sum = 0;
-        File[] files = folder.listFiles();
-        assert files != null;
-        for (File file : files) {
-            sum += getFolderSize(file);
-        }
-        return sum;
     }
 }
